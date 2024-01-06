@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MediaGateway.Interfaces;
 using MediaGateway.Processor;
+using MediaGateway.Models;
 
 namespace MediaGateway.Controllers
 {
@@ -11,16 +12,16 @@ namespace MediaGateway.Controllers
         private readonly ILogger<MediaController> _logger;
         private IDocumentProcessor DocumentProcessor { get; set; }
 
-        public MediaController(ILogger<MediaController> logger, IBlobService blobService)
+        public MediaController(ILogger<MediaController> logger, IDocumentProcessor documentProcessor)
         {
             _logger = logger;
-            DocumentProcessor = new DocumentProcessor(blobService);
+            DocumentProcessor = documentProcessor;
         }
 
         [HttpPost("SetMediaDocuments")]
         public async Task<IActionResult> SetMediaDocument([FromForm] Media media)
         {            
-            await DocumentProcessor.StoreMediaDocument(media);
+            await DocumentProcessor.SaveMediaDocument(media);
             return Ok();
         }
     }

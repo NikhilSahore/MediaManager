@@ -1,26 +1,31 @@
 ﻿using Azure.Storage.Blobs.Models;
 using MediaGateway.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using MediaGateway.Models;
 
 namespace MediaGateway.Processor
 {
     public class DocumentProcessor : IDocumentProcessor
     {
-        private IBlobService BlobService { get; set; }
+        private IMediaBlobService MediaBlobService { get; set; }
 
-        public DocumentProcessor(IBlobService blobService)
+        private IMediaDatabaseService MediaDatabaseService { get; set; }
+
+        public DocumentProcessor(IMediaBlobService mediaBlobService, IMediaDatabaseService mediaDatabaseService)
         {
-            BlobService = blobService;
+            MediaBlobService = mediaBlobService;
+            MediaDatabaseService = mediaDatabaseService;
         }
-        public async Task StoreMediaDocument(Media media)
-        {            
+        public async Task SaveMediaDocument(Media media)
+        {
+            MediaDatabaseService.Create(media);
             foreach(var photo in media.Photos)
             {
-                await BlobService.UploadBlobAsync(photo.File, photo.Name);
+                await MediaBlobService.UploadBlobAsync(photo.File, media.Id);
             }
             foreach (var video in media.Videos)
             {
-                await BlobService.UploadBlobAsync(video.File, video.Name);
+                await MediaBlobService.UploadBlobAsync(video.File, media.Id);
             }
         }
     }
